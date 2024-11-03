@@ -154,6 +154,28 @@ void Graph::breadthFirstSearch(string startNeighborhood) {  //add input to speci
     cout << endl;
 }
 
+/*Graphing Algo 1 - Natural Disaster 
+
+- Number Grocery Stores per 1000 (.7)
+- Number of Corner Stores per 1000 (.3)
+- Poverty Rate (.6)
+
+// sorting algorithm: insert sort
+
+*/
+
+
+/*Graphing Algo 2 - General Sorting Algo 
+
+- Poverty Rate (0.5)
+- Median Income (0.5) 
+- Grade (0.3)
+- Miles to Grocery Store 
+- Miles to Snap 
+
+*/
+
+
 
 
 int main() {
