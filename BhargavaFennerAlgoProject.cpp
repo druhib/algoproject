@@ -1,19 +1,12 @@
 #include <iostream>
-<<<<<<< Updated upstream
-#include <string>
-
-using namespace std;
-
-int main(){
-
-    cout<<"test"<<endl;
-=======
 #include <list>
 #include <map>
 #include <string>
+#include <queue>
+#include <set>
 using namespace std;
 
-//NODE CLASS - each neigborhood is a node with a grade, number of soup kitchens, median income, list of transport lines, and list of connections to other nodes
+//NODE CLASS - each neighborhood is a node with a grade, number of soup kitchens, median income, list of transport lines, and list of connections to other nodes
 class Node {
 public:
     string neighborhood;
@@ -32,7 +25,6 @@ public:
     }
 };
 
-
 //GRAPH CLASS- connections neighborhoods
 class Graph {
 private:
@@ -43,6 +35,7 @@ public:
     void addEdge(string src, string dest);
     void addNeighborhood(string name, char grade, int soup_kitchens, double median_income, list<string> transport);
     void displayGraph();
+    void breadthFirstSearch(string startNeighborhood); 
 };
 
 //constructor 
@@ -106,6 +99,61 @@ void Graph::displayGraph() {
     }
 }
 
+// BFS implementation ?
+void Graph::breadthFirstSearch(string startNeighborhood) {  //add input to specify algorithm
+
+    std::queue<Node*> nodeQueue; // Queue to hold nodes to be explored
+    std::set<string> visited; // Set to keep track of visited neighborhoods
+
+    // Find the starting node
+    Node* startNode = nullptr;
+    for (int i = 0; i < vertices; i++) {
+        if (adjList[i] != nullptr && adjList[i]->neighborhood == startNeighborhood) {
+            startNode = adjList[i];
+            break;
+        }
+    }
+
+    if (startNode == nullptr) {
+        cout << "Starting neighborhood not found." << endl;
+        return;
+    }
+
+    // Start BFS
+    nodeQueue.push(startNode);
+    visited.insert(startNode->neighborhood);
+
+    cout << "BFS Route starting from " << startNeighborhood << ": " << endl;
+
+    while (!nodeQueue.empty()) {
+        Node* currentNode = nodeQueue.front();
+        nodeQueue.pop();
+        
+        // Print current node information
+        cout << currentNode->neighborhood << " "<<endl;
+        
+        
+        // Iterate through all the connected nodes
+        for (Node* neighbor : currentNode->connections) {
+
+            //Call sorting function, using switch case to specify which sorting algorithm to use
+        
+
+            //cout <<  currentNode -> neighborhood << " Edge:";
+            if (visited.find(neighbor->neighborhood) == visited.end()) {
+                //cout << neighbor -> neighborhood<<endl;
+                visited.insert(neighbor->neighborhood);
+                nodeQueue.push(neighbor);
+            }
+        }
+
+
+
+    }
+
+    cout << endl;
+}
+
 
 
 int main() {
@@ -132,10 +180,14 @@ int main() {
     graph.addEdge("Roxbury", "Roslindale");
     graph.addEdge("Roxbury", "Mattapan");
     graph.addEdge("Roxbury", "Dorchester");
-   
 
+    graph.addEdge("Mattapan","South End");
+    graph.addEdge("South End","Hyde Park");
+    graph.addEdge("Roslindale","South End");
+   
     graph.displayGraph();
 
+    graph.breadthFirstSearch("Roxbury");
+
     return 0;
->>>>>>> Stashed changes
 }
