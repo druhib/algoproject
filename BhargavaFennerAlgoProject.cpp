@@ -14,6 +14,7 @@ using namespace std;
 //NODE CLASS - each neighborhood is a node with a grade, number of soup kitchens, median income, list of transport lines, and list of connections to other nodes
 class Node {
 public:
+    //Node * next; 
     string neighborhood; //name of neighborhood
     char grade; // redlining grade
     int num_grocery_stores; //number of grocery stores
@@ -30,6 +31,8 @@ public:
     float median_income; //median income ($k)
     list<string> transport; // List of transport lines
     list<Node*> connections; // List of connections to other nodes
+
+
 
     //constructor with all variables 
   Node(string name, char g, int num_grocery_stores, 
@@ -64,7 +67,7 @@ public:
 class Graph {
 private:
     int vertices; //number of neighborhoods
-    Node** adjList; // array of nodes (neighborhoods)
+    Node** adjList; // array of nodes (neighborhoods) // notation ? 
 public:
     Graph(int v);                                                              //create the graph
     void addEdge(string src, string dest);                                     //add a connection
@@ -77,6 +80,7 @@ public:
      list<string> trans);
     void displayGraph();                                                       //display all data for each neighborhood
     void breadthFirstSearch(string startNeighborhood);                         //BFS given starting neighborhood
+    void generalSorting(list<Node*> connections); 
 };
 
 
@@ -178,8 +182,11 @@ void Graph::displayGraph() {
 //______________________________________________________________________________________
 void Graph::breadthFirstSearch(string startNeighborhood) {  //add input to specify algorithm
 
-    std::queue<Node*> nodeQueue; // Queue to hold nodes to be explored
-    std::set<string> visited; // Set to keep track of visited neighborhoods
+    queue<Node*> nodeQueue; // Queue to hold nodes to be explored
+    set<string> visited; // Set to keep track of visited neighborhoods
+    
+    queue<Node*> tempQueue;
+    queue<Node*> SortedQueue;
 
     // Find the starting node
     Node* startNode = nullptr;
@@ -194,26 +201,37 @@ void Graph::breadthFirstSearch(string startNeighborhood) {  //add input to speci
         cout << "Starting neighborhood not found." << endl;
         return;
     }
+    
 
     // Start BFS
-    nodeQueue.push(startNode);
+    nodeQueue.push(startNode); // i am confused how a queue is using push and pop 
     visited.insert(startNode->neighborhood);
 
     cout << "BFS Route starting from " << startNeighborhood << ": " << endl;
 
+    generalSorting(startNode-> connections);
+
     while (!nodeQueue.empty()) {
         Node* currentNode = nodeQueue.front();
         nodeQueue.pop();
+
         
+        
+
+
         // Print current node information
-        cout << currentNode->neighborhood << " "<<endl;
+        //cout << currentNode->neighborhood << " "; // Printing individual nodes 
+        //cout << currentNode-> poverty_rate << endl; 
+
         
         
         // Iterate through all the connected nodes
         for (Node* neighbor : currentNode->connections) {
 
             //Call sorting function, using switch case to specify which sorting algorithm to use
-        
+           // cout << "current Node:" << currentNode ->neighborhood << endl;  // all Roxbury 
+            
+
 
             //cout <<  currentNode -> neighborhood << " Edge:";
             if (visited.find(neighbor->neighborhood) == visited.end()) {
@@ -231,7 +249,53 @@ void Graph::breadthFirstSearch(string startNeighborhood) {  //add input to speci
 }
 //______________________________________________________________________________________
 
+// class DoubleLInkedList{
+//     Node data; 
 
+
+// }; 
+//_______________________________________________________________
+// bool comparator ???
+bool comparePovertyRate(Node* a, Node* b) {
+    return a->poverty_rate < b->poverty_rate;  // Sort in ascending order of poverty_rate
+}
+
+//______________________________________________________________________________________
+// can acess by passing in starting node 
+void Graph::generalSorting(list<Node*> connections) {
+
+    list<Node*> sorted = connections; 
+    sorted.sort(comparePovertyRate);
+
+    cout << "Sorted by poverty rate: " << endl;
+    for (Node* neighbor : sorted) {
+        cout << neighbor->neighborhood << " ";
+        cout << neighbor->poverty_rate << " ";
+        cout << endl;
+    }
+
+//   for (Node* neighbor : connections) {
+//     // Do something with each Node pointer (neighbor)
+//     cout << neighbor->neighborhood << " ";  // Accessing a member of the Node class 
+//     cout << neighbor-> poverty_rate <<" "; 
+
+   
+  }
+
+   
+   
+//    for (int i = 0; i < vertices; i++) {
+//         if (adjList[i] != nullptr) {
+//             Node* temp = adjList[i];
+//             cout << "Neighborhood name: "  << temp -> neighborhood << endl; 
+//         } 
+//    } 
+    // charcteristic of a weight --> private property 
+    
+ // list of all Neighborhoods
+//     //int n = adjList.size(); 
+
+//     //for( int i = 0, i < ) 
 
 
 
@@ -296,9 +360,43 @@ int main() {
     graph.addEdge("Roslindale","South End");
    
 
-    graph.displayGraph();
+    //graph.displayGraph();
 
     graph.breadthFirstSearch("Roxbury");
+    //string grade = "grade"; 
+    //graph.generalSorting(grade); 
+
+
+    // // Menu:
+    // bool system_running = true; 
+    // int selection;  
+    
+    // while(system_running)
+    // {
+    //     cout << "Please select (1-4)\n" <<
+    //             "1. Display all Neighborhoods \n" << endl; 
+    //     cin >> selection; 
+
+    //     switch(selection){
+    //         case 1:
+    //             //cout << "Display all neighborhoods" << endl; 
+    //             graph.displayGraph();
+    //             break; 
+    //         case 2:
+    //             break; 
+    //         case 3: 
+    //             break; 
+    //         case 4:
+    //             break; 
+
+    //         default:
+    //             cout << "default case "<< endl; 
+    //             break; 
+    //     } 
+
+    // }       
+
+
 
     
 
