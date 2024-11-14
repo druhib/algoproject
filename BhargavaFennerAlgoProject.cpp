@@ -12,7 +12,9 @@
 using namespace std;
 //______________________________________________________________________________________
 
+// int numVertices = 17; 
 //string listofFactors[] = {" neighborhood", "grade","num_grocery_stores", "grocery_per_1000","num_grocery_7ft_surge","num_corner_stores","corner_per_1000","num_corner_in_floodplain","num_corner_7ft_surge","avg_distance_grocery","poverty_rate","snap_rate","avg_distance_snap","median_income"}; 
+//string NeighborhoodNames = {"Allston", "Backbay", "Beacon Hill", "Brighton", "CharlesTown", "Dorchester", "East Boston", "Fenway", "" }; 
 
 // global Hash map for storing factor weights
 unordered_map<string, float> factorWeights;
@@ -69,7 +71,7 @@ public:
 
     // Method to calculate the total weight based on global factor weights
     float getWeight() const {
-        float totalWeight = 0.0f;
+        float totalWeight = 0.0;
 
         if (factorWeights.count("poverty_rate") == 1) {
         //cout << "count: " << factorWeights.count("poverty_rate") <<endl; 
@@ -122,13 +124,12 @@ class Graph {
 public:
     unordered_map<string, Vertex*> adjList; // Map of neighborhood name to Node // hash map 
 
-    void addNeighborhood(Vertex* neighborhood) {
+    Graph(){}
+
+    void addNeighborhood(Vertex* neighborhood) {            
         adjList[neighborhood->neighborhood] = neighborhood;             // look up table, searching adJList by name 
     }
 
-    Graph()
-    {
-    }
 
   void addEdge(string src, string dest) {
         if (adjList.find(src) != adjList.end() && adjList.find(dest) != adjList.end()) {
@@ -137,63 +138,25 @@ public:
         }
     }
 
-/*
-// BFS implementation
-//______________________________________________________________________________________
-void breadthFirstSearch(string startNeighborhood) {  //add input to specify algorithm
-
-    std::queue<Vertex*> nodeQueue; // Queue to hold nodes to be explored
-    std::set<string> visited; // Set to keep track of visited neighborhoods
-
-    // Find the starting node
-    Vertex* startNode = nullptr;
-    for (int i = 0; i < vertices; i++) {
-        if (adjList[i] != nullptr && adjList[i]->neighborhood == startNeighborhood) {
-            startNode = adjList[i];
-            break;
-        }
-    }
-
-    if (startNode == nullptr) {
-        cout << "Starting neighborhood not found." << endl;
-        return;
-    }
-
-    // Start BFS
-    nodeQueue.push(startNode);
-    visited.insert(startNode->neighborhood);
-
-    cout << "BFS Route starting from " << startNeighborhood << ": " << endl;
-
-    while (!nodeQueue.empty()) {
-        Vertex* currentNode = nodeQueue.front();
-        nodeQueue.pop();
-        
-        // Print current node information
-        cout << currentNode->neighborhood << " "<<endl;
-        
-        
-        // Iterate through all the connected nodes
-        for (Vertex* neighbor : currentNode->connections) {
-
-            //Call sorting function, using switch case to specify which sorting algorithm to use
-        
-
-            //cout <<  currentNode -> neighborhood << " Edge:";
-            if (visited.find(neighbor->neighborhood) == visited.end()) {
-                //cout << neighbor -> neighborhood<<endl;
-                visited.insert(neighbor->neighborhood);
-                nodeQueue.push(neighbor);
-            }
-        }
-
-
+    void SearchNeighborhood(string name){
+         cout << "Neighborhood: "  << adjList[name]->neighborhood<< "\n" << 
+                "grade: " << adjList[name]->grade << "\n" <<
+                "number of grcoery stores: " << adjList[name]->num_grocery_stores << "\n" <<
+                "grocery stores per 1000: " << adjList[name] ->grocery_per_1000 << "\n" <<
+                "number of grocery stores 7ft surge: " << adjList[name]-> num_grocery_7ft_surge << "\n" <<
+                "number of corner stores: " << adjList[name] ->num_corner_stores << "\n" << 
+                "number of corner stores per 1000: " <<  adjList[name]->corner_per_1000 << "\n" <<
+                "number of corner in floodplain: " << adjList[name]-> num_corner_in_floodplain << "\n" <<  
+                "number of corner in 7ft surge: " << adjList[name]-> num_corner_7ft_surge << "\n" <<
+                "poverty rate: " << adjList[name]-> poverty_rate <<"\n" << 
+                "snap rate: " << adjList[name]->snap_rate << "\n" << 
+                "avg distance to snap: " << adjList[name]-> avg_distance_snap << "\n" <<
+                "median_income: " << adjList[name]-> median_income << endl; 
+    
 
     }
 
-    cout << endl;
-}
-*/
+
 
 // BFS starting from a specific node, sorting neighbors by their weighted score
     void bfsWithWeightedOrder(string start) {
@@ -215,8 +178,6 @@ void breadthFirstSearch(string startNeighborhood) {  //add input to specify algo
             // Sort the neighbors based on the weighted score (highest to lowest)
             vector<Vertex*> sortedNeighbors(currentNode->connections.begin(), currentNode->connections.end());
             sort(sortedNeighbors.begin(), sortedNeighbors.end(), [](Vertex* a, Vertex* b) {
-                cout << a->neighborhood << ": " << a->getWeight() << " "; 
-                cout << b->neighborhood << ": " << b->getWeight() <<endl; 
                 return a->getWeight() > b->getWeight(); // Sort in descending order of weight
             });
 
@@ -233,37 +194,6 @@ void breadthFirstSearch(string startNeighborhood) {  //add input to specify algo
 };
 
 
-
-
-//______________________________________________________________________________________
-/*
-void Graph::displayGraph() {
-    //iterate through list, printing each data point for each neighborhood
-    for (int i = 0; i < vertices; i++) {
-        if (adjList[i] != nullptr) {
-            Node* temp = adjList[i];
-
-
-            cout << "Neighborhood: " << temp->neighborhood << endl;
-            cout << "Grade: " << temp->grade << endl;
-            cout << "Median Income: " << temp->median_income << "k" << endl;
-
-
-            cout << "Transport Lines: ";
-            for (auto line : temp->transport) {
-                cout << line << " ";
-            }
-            cout << endl;
-            cout << "Connected to: ";
-            for (auto connection : temp->connections) {
-                cout << connection->neighborhood << " ";
-            }
-            cout << endl << endl;
-        }
-    }
-}
-//______________________________________________________________________________________
-*/
 
 int main() {
 
@@ -327,46 +257,59 @@ int main() {
    
 
 
-    //graph.displayGraph();
-
-    graph.breadthFirstSearch("Roxbury");
-    //string grade = "grade"; 
-    //graph.generalSorting(grade); 
-
-
-    // // Menu:
-    // bool system_running = true; 
-    // int selection;  
+    // Menu:
+    bool system_running = true; 
+    int selection;  
+    string neighborhoodName; 
     
-    // while(system_running)
-    // {
-    //     cout << "Please select (1-4)\n" <<
-    //             "1. Display all Neighborhoods \n" << endl; 
-    //     cin >> selection; 
-
-    //     switch(selection){
-    //         case 1:
-    //             //cout << "Display all neighborhoods" << endl; 
-    //             graph.displayGraph();
-    //             break; 
-    //         case 2:
-    //             break; 
-    //         case 3: 
-    //             break; 
-    //         case 4:
-    //             break; 
-
-    //         default:
-    //             cout << "default case "<< endl; 
-    //             break; 
-    //     } 
-
-    // }       
+    while(system_running)
+    {
+        cout << "Please select (1-4)\n" <<
+                "1.Search for a Neighborhood \n" <<
+                "4.End Program\n " << 
+                
+                "Number Entered: "; 
 
 
 
-    getUserInputForWeights();
-    graph.bfsWithWeightedOrder("Roxbury");
+        cin >> selection; 
+
+        switch(selection){
+            case 1:
+                
+
+                cout << "Enter a Neighborhood: "; 
+                cin >> neighborhoodName;
+                graph.SearchNeighborhood(neighborhoodName); 
+
+                //cout << "Display all neighborhoods" << endl; 
+                //graph.displayGraph();
+                // print nodes ? 
+                // print data 
+                break; 
+            case 2:
+                break; 
+            case 3: 
+                break; 
+            case 4:
+                cout << "Ending Program" << endl; 
+                system_running = false; 
+                break; 
+
+            default:
+                cout << "default case "<< endl; 
+                break; 
+        } 
+
+    }       
+
+
+
+    // getUserInputForWeights();
+    // graph.bfsWithWeightedOrder("Roxbury");
+
+
+    // delete nodes 
 
     
 
