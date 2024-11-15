@@ -70,52 +70,55 @@ public:
 
 
     // Method to calculate the total weight based on global factor weights
-    float getWeight() const {
+    float getWeight_gen() const {
         float totalWeight = 0.0;
 
-        if (factorWeights.count("poverty_rate") == 1) {
-        //cout << "count: " << factorWeights.count("poverty_rate") <<endl; 
-        totalWeight += factorWeights["poverty_rate"] * poverty_rate;
+            if (factorWeights.count("poverty_rate") == 1) {
+                //cout << "count: " << factorWeights.count("poverty_rate") <<endl; 
+                totalWeight += factorWeights["poverty_rate"] * poverty_rate;
+            }
+
+            // Check if "grocery_per_1000" exists in factorWeights map
+            if (factorWeights.count("median_income") == 1) {
+                totalWeight += factorWeights["median_income"] * median_income;
+            }
+
+            // Check if "corner_per_1000" exists in factorWeights map
+            if (factorWeights.count("avg_distance_grocery") == 1) {
+                totalWeight += factorWeights["avg_distance_grocery"] * avg_distance_grocery;
+            }
+
+            return totalWeight;
+    } 
+    
+    
+    // Method to calculate the total weight based on global factor weights during storm surge
+    float getWeight_natural_disaster() const {
+        float totalWeight = 0.0;
+            if (factorWeights.count("num_grocery_7ft_surge") == 1) {
+                //cout << "count: " << factorWeights.count("poverty_rate") <<endl; 
+                totalWeight += factorWeights["num_grocery_7ft_surge"] * num_grocery_7ft_surge;
+            }
+
+
+            if (factorWeights.count("num_corner_in_floodplain") == 1) {
+                totalWeight += factorWeights["num_corner_in_floodplain"] * num_corner_in_floodplain;
+            }
+
+            if (factorWeights.count("num_corner_7ft_surge") == 1) {
+                totalWeight += factorWeights["num_corner_7ft_surge"] * num_corner_7ft_surge;
+            }
+
+    
+            if (factorWeights.count("poverty_rate") == 1) {
+                totalWeight += factorWeights["poverty_rate"] * poverty_rate;
+            }
+            return totalWeight;
     }
 
-    // Check if "grocery_per_1000" exists in factorWeights map
-    if (factorWeights.count("grocery_per_1000") == 1) {
-        totalWeight += factorWeights["grocery_per_1000"] * grocery_per_1000;
-    }
 
-    // Check if "corner_per_1000" exists in factorWeights map
-    if (factorWeights.count("corner_per_1000") == 1) {
-        totalWeight += factorWeights["corner_per_1000"] * corner_per_1000;
-    }
-
-        //cout << "Neighborhood:" << totalWeight << endl; 
-        return totalWeight;
-    }
 };
 
- // Comparison function for sorting based on weight
-bool compareVertices(Vertex* a, Vertex* b) {
-    return a->getWeight() > b->getWeight();  // Sort in descending order based on weight
-}
-
-
-// menu bar 
-void getUserInputForWeights() {
-    // Initialize all factor weights to zero
-    factorWeights["poverty_rate"] = 0.0f;
-    factorWeights["grocery_per_1000"] = 0.0f;
-    factorWeights["corner_per_1000"] = 0.0f;
-
-    // Prompt the user to input weights for each factor
-    cout << "Enter the weight for poverty_rate (0.0 to 1.0): ";
-    cin >> factorWeights["poverty_rate"];
-
-    cout << "Enter the weight for grocery_per_1000 (0.0 to 1.0): ";
-    cin >> factorWeights["grocery_per_1000"];
-
-    cout << "Enter the weight for corner_per_1000 (0.0 to 1.0): ";
-    cin >> factorWeights["corner_per_1000"];
-}
 
 
 //GRAPH CLASS- connect neighborhoods in a graph
@@ -159,13 +162,14 @@ public:
 
 
 // BFS starting from a specific node, sorting neighbors by their weighted score
-    void bfsWithWeightedOrder(string start) {
+    void bfsWithWeightedOrder(string start, int choice) {
         unordered_map<string, bool> visited;
         queue<Vertex*> bfsQueue;
 
         // Start BFS with the start node
         bfsQueue.push(adjList[start]);
         visited[start] = true;
+
 
         while (!bfsQueue.empty()) {
             // Get all the neighbors of the current node
@@ -177,8 +181,17 @@ public:
 
             // Sort the neighbors based on the weighted score (highest to lowest)
             vector<Vertex*> sortedNeighbors(currentNode->connections.begin(), currentNode->connections.end());
-            sort(sortedNeighbors.begin(), sortedNeighbors.end(), [](Vertex* a, Vertex* b) {
-                return a->getWeight() > b->getWeight(); // Sort in descending order of weight
+            
+            sort(sortedNeighbors.begin(), sortedNeighbors.end(), [choice](Vertex* a, Vertex* b) {
+                if (choice ==1){
+                    return a->getWeight_gen() > b->getWeight_gen(); // Sort in descending order of weight
+                }
+                
+                else if (choice ==2){
+                    return a->getWeight_natural_disaster() > b->getWeight_natural_disaster(); // Sort in descending order of weight
+                }
+                return false;
+                
             });
 
             // Visit all sorted neighbors
@@ -192,6 +205,56 @@ public:
     }
 
 };
+
+
+
+
+/*
+ // Comparison function for sorting based on weight
+bool compareVertices(Vertex* a, Vertex* b) {
+    return a->getWeight_gen() > b->getWeight_gen();  // Sort in descending order based on weight
+}
+*/
+
+
+// menu bar 
+void getUserInputForWeights() {
+    // Initialize all factor weights to zero
+    factorWeights["poverty_rate"] = 0.0;
+    factorWeights["median_income"] = 0.0;
+    factorWeights["avg_distance_grocery"] = 0.0;
+
+    // Prompt the user to input weights for each factor
+    cout << "Enter the weight for poverty_rate (0.0 to 1.0): ";
+    cin >> factorWeights["poverty_rate"];
+
+    cout << "Enter the weight for median_income (0.0 to 1.0): ";
+    cin >> factorWeights["median_income"];
+
+    cout << "Enter the weight for avg_distance_grocery (the average distance to a grocery store) (0.0 to 1.0): ";
+    cin >> factorWeights["avg_distance_grocery"];
+}
+
+void getUserInputForWeights_Natural_Disaster() {
+    // Initialize all factor weights to zero
+    factorWeights["num_grocery_7ft_surge"] = 0.0;
+    factorWeights["num_corner_in_floodplain"] = 0.0;
+    factorWeights["num_corner_7ft_surge"] = 0.0;
+    factorWeights["poverty_rate"] = 0.0;
+
+    // Prompt the user to input weights for each factor
+    cout << "Enter the weight for num_grocery_7ft_surge (Number of accessible grocery stores in a 7.5 foot storm surge) (0.0 to 1.0): ";
+    cin >> factorWeights["num_grocery_7ft_surge"];
+
+    cout << "Enter the weight for num_corner_in_floodplain (Number of corner stores in a floodplain) (0.0 to 1.0): ";
+    cin >> factorWeights["num_corner_in_floodplain"];
+
+    cout << "Enter the weight for num_corner_7ft_surge (Number of corner stores accessible during a 7.5 foot storm surge) (0.0 to 1.0): ";
+    cin >> factorWeights["num_corner_7ft_surge"];
+
+    cout << "Enter the weight for poverty_rate (0.0 to 1.0): ";
+    cin >> factorWeights["poverty_rate"];
+}
 
 
 
@@ -246,6 +309,8 @@ int main() {
     graph.addNeighborhood(West_End);
     graph.addNeighborhood(West_Roxbury); 
 
+
+    //add edges
     graph.addEdge("Roxbury", "Jamaica Plain");
     graph.addEdge("Roxbury", "Roslindale");
     graph.addEdge("Roxbury", "Mattapan");
@@ -261,11 +326,14 @@ int main() {
     bool system_running = true; 
     int selection;  
     string neighborhoodName; 
+
     
     while(system_running)
     {
         cout << "Please select (1-4)\n" <<
-                "1.Search for a Neighborhood \n" <<
+                "1.Display a Neighborhoods Data \n" <<
+                "2.General Mobile Market Route\n" <<
+                "3.Mobile Market Route During a Natural Disaster\n" <<
                 "4.End Program\n " << 
                 
                 "Number Entered: "; 
@@ -276,42 +344,61 @@ int main() {
 
         switch(selection){
             case 1:
-                
-
                 cout << "Enter a Neighborhood: "; 
                 cin >> neighborhoodName;
-                graph.SearchNeighborhood(neighborhoodName); 
+                if (graph.adjList.count(neighborhoodName) == 1) {
+                    graph.SearchNeighborhood(neighborhoodName); 
+                }
+                else if (graph.adjList.count(neighborhoodName) == 0){
+                    cout << "Not a Valid Neighborhood." <<endl;
+                }
 
-                //cout << "Display all neighborhoods" << endl; 
-                //graph.displayGraph();
-                // print nodes ? 
-                // print data 
                 break; 
+
             case 2:
+                cout << "Enter a Neighborhood to start the route at: "; 
+                cin >> neighborhoodName;
+                
+                if (graph.adjList.count(neighborhoodName) == 1) {
+                    getUserInputForWeights();
+                    graph.bfsWithWeightedOrder(neighborhoodName,1);
+                }
+                else if (graph.adjList.count(neighborhoodName) == 0){
+                    cout << "Not a Valid Neighborhood." <<endl;
+                }
+                
+                
+        
                 break; 
+
             case 3: 
+                cout << "Enter a Neighborhood to start the route at: "; 
+                cin >> neighborhoodName;
+                  if (graph.adjList.count(neighborhoodName) == 1) {
+                    getUserInputForWeights_Natural_Disaster();
+                    graph.bfsWithWeightedOrder(neighborhoodName,2);
+                }
+                else if (graph.adjList.count(neighborhoodName) == 0){
+                    cout << "Not a Valid Neighborhood." <<endl;
+                }
+                
                 break; 
+
             case 4:
                 cout << "Ending Program" << endl; 
                 system_running = false; 
                 break; 
 
             default:
-                cout << "default case "<< endl; 
+                cout << "Invalid Number."<< endl; 
                 break; 
         } 
 
     }       
 
 
+//delete nodes
 
-    // getUserInputForWeights();
-    // graph.bfsWithWeightedOrder("Roxbury");
-
-
-    // delete nodes 
-
-    
 
     return 0;
 }
