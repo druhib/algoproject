@@ -1,4 +1,6 @@
 
+//EECE2560 Final Project, Fausta Fenner and Druhi Bhargava
+
 //______________________________________________________________________________________
 #include <iostream>
 #include <list>
@@ -12,17 +14,15 @@
 using namespace std;
 //______________________________________________________________________________________
 
-// int numVertices = 17; 
+
 //string listofFactors[] = {" neighborhood", "grade","num_grocery_stores", "grocery_per_1000","num_grocery_7ft_surge","num_corner_stores","corner_per_1000","num_corner_in_floodplain","num_corner_7ft_surge","avg_distance_grocery","poverty_rate","snap_rate","avg_distance_snap","median_income"}; 
-//string NeighborhoodNames = {"Allston", "Backbay", "Beacon Hill", "Brighton", "CharlesTown", "Dorchester", "East Boston", "Fenway", "" }; 
 
 // global Hash map for storing factor weights
 unordered_map<string, float> factorWeights;
 
-//NODE CLASS - each neighborhood is a node with a grade, number of soup kitchens, median income, list of transport lines, and list of connections to other nodes
+//Vertex CLASS - each neighborhood is a vertex with a grade, number of soup kitchens, median income, list of connections to other nodes, etc
 class Vertex {
 public:
-    //Node * next; 
     string neighborhood; //name of neighborhood
     char grade; // redlining grade
     int num_grocery_stores; //number of grocery stores
@@ -39,7 +39,6 @@ public:
     float median_income; //median income ($k)
     list<string> transport; // List of transport lines
     list<Vertex*> connections; // List of connections to other nodes
-
 
 
     //constructor with all variables 
@@ -73,12 +72,13 @@ public:
     float getWeight_gen() const {
         float totalWeight = 0.0;
 
+            // Check if "poverty_rate" exists in factorWeights map
             if (factorWeights.count("poverty_rate") == 1) {
-                //cout << "count: " << factorWeights.count("poverty_rate") <<endl; 
+                //if it exists, add its value * the weight to the totalWeight
                 totalWeight += factorWeights["poverty_rate"] * poverty_rate;
             }
 
-            // Check if "grocery_per_1000" exists in factorWeights map
+            //repeat for all factors
             if (factorWeights.count("median_income") == 1) {
                 totalWeight += factorWeights["median_income"] * median_income;
             }
@@ -88,6 +88,7 @@ public:
                 totalWeight += factorWeights["avg_distance_grocery"] * avg_distance_grocery;
             }
 
+            //return the final weight
             return totalWeight;
     } 
     
@@ -95,8 +96,9 @@ public:
     // Method to calculate the total weight based on global factor weights during storm surge
     float getWeight_natural_disaster() const {
         float totalWeight = 0.0;
+
+            //same strategy as above get weight, but for different factors
             if (factorWeights.count("num_grocery_7ft_surge") == 1) {
-                //cout << "count: " << factorWeights.count("poverty_rate") <<endl; 
                 totalWeight += factorWeights["num_grocery_7ft_surge"] * num_grocery_7ft_surge;
             }
 
@@ -125,24 +127,29 @@ public:
 class Graph {
 
 public:
-    unordered_map<string, Vertex*> adjList; // Map of neighborhood name to Node // hash map 
+    unordered_map<string, Vertex*> adjList; // Hasp map of neighborhood name to Node 
 
+    //constructor 
     Graph(){}
 
+    //function to add a neighborhood into the graph
     void addNeighborhood(Vertex* neighborhood) {            
-        adjList[neighborhood->neighborhood] = neighborhood;             // look up table, searching adJList by name 
+        adjList[neighborhood->neighborhood] = neighborhood;    // look up table, searching adJList by name 
     }
 
-
-  void addEdge(string src, string dest) {
+    //function to add an edge between two neighborhoods given the source and desination neighborhood
+    void addEdge(string src, string dest) {
+        //if the connection does not already exist, add it 
         if (adjList.find(src) != adjList.end() && adjList.find(dest) != adjList.end()) {
             adjList[src]->connections.push_back(adjList[dest]);
             adjList[dest]->connections.push_back(adjList[src]); // Assuming undirected graph--> connections are made both both ways 
         }
     }
 
+    //function to to print out a given neighborhoods data
     void SearchNeighborhood(string name){
          cout << "Neighborhood: "  << adjList[name]->neighborhood<< "\n" << 
+                //cout each variable name and value
                 "grade: " << adjList[name]->grade << "\n" <<
                 "number of grcoery stores: " << adjList[name]->num_grocery_stores << "\n" <<
                 "grocery stores per 1000: " << adjList[name] ->grocery_per_1000 << "\n" <<
@@ -155,8 +162,6 @@ public:
                 "snap rate: " << adjList[name]->snap_rate << "\n" << 
                 "avg distance to snap: " << adjList[name]-> avg_distance_snap << "\n" <<
                 "median_income: " << adjList[name]-> median_income << endl; 
-    
-
     }
 
 
@@ -172,29 +177,29 @@ public:
 
 
         while (!bfsQueue.empty()) {
-            // Get all the neighbors of the current node
+            //get all the neighbors of the current node
             Vertex* currentNode = bfsQueue.front();
             bfsQueue.pop();
 
-            // Print the current node (neighborhood)
+            //Print the current node (neighborhood)
             cout << "Visiting neighborhood: " << currentNode->neighborhood << endl;
 
-            // Sort the neighbors based on the weighted score (highest to lowest)
+            //sort the neighbors based on the weighted score (highest to lowest)
             vector<Vertex*> sortedNeighbors(currentNode->connections.begin(), currentNode->connections.end());
             
             sort(sortedNeighbors.begin(), sortedNeighbors.end(), [choice](Vertex* a, Vertex* b) {
                 if (choice ==1){
-                    return a->getWeight_gen() > b->getWeight_gen(); // Sort in descending order of weight
+                    return a->getWeight_gen() > b->getWeight_gen(); //Sort in descending order of weight
                 }
                 
                 else if (choice ==2){
-                    return a->getWeight_natural_disaster() > b->getWeight_natural_disaster(); // Sort in descending order of weight
+                    return a->getWeight_natural_disaster() > b->getWeight_natural_disaster(); //Sort in descending order of weight
                 }
                 return false;
                 
             });
 
-            // Visit all sorted neighbors
+            //visit all sorted neighbors
             for (Vertex* neighbor : sortedNeighbors) {
                 if (!visited[neighbor->neighborhood]) {
                     visited[neighbor->neighborhood] = true;
@@ -209,15 +214,7 @@ public:
 
 
 
-/*
- // Comparison function for sorting based on weight
-bool compareVertices(Vertex* a, Vertex* b) {
-    return a->getWeight_gen() > b->getWeight_gen();  // Sort in descending order based on weight
-}
-*/
-
-
-// menu bar 
+//get user inputs for the weight value of each variable 
 void getUserInputForWeights() {
     // Initialize all factor weights to zero
     factorWeights["poverty_rate"] = 0.0;
@@ -235,6 +232,7 @@ void getUserInputForWeights() {
     cin >> factorWeights["avg_distance_grocery"];
 }
 
+//get user inputs for the weight value of each variable during a natural disaster
 void getUserInputForWeights_Natural_Disaster() {
     // Initialize all factor weights to zero
     factorWeights["num_grocery_7ft_surge"] = 0.0;
@@ -260,6 +258,7 @@ void getUserInputForWeights_Natural_Disaster() {
 
 int main() {
 
+    //initlizae all vertices
     Vertex* Allston = new Vertex("Allston", 'C', 3, 0.1, 0, 12, 0.41, 0, 1, 0.37, 17.7, 8.1, 0.16, 52.1, {"Green Line"});
     Vertex* Backbay = new Vertex("Backbay", 'C', 2, 0.1, 0, 5, 0.28, 0, 3, 0.23, 7.1, 4.1, 0.14, 97.8, {"Green Line"});
     Vertex* Beacon_Hill = new Vertex("Beacon Hill", 'A', 0, 0, 0, 3, 0.33, 0, 1, 0.24, 5.8, 2.5, 0.14, 102.2, {"Green Line"});
@@ -283,9 +282,10 @@ int main() {
     Vertex* West_End = new Vertex("West End", 'D', 1, 0.25, 0, 1, 0.25, 0, 0, 0.21, 10.3, 6.4, 0.18, 83.8, {"Green Line"});
     Vertex* West_Roxbury = new Vertex("West Roxbury", 'B', 2, 0.07, 0, 4, 0.13, 0, 0, 0.33, 5.8, 7.5, 0.33, 90.5, {"Green Line"});
 
-
+    //initialize graph 
     Graph graph;
 
+    //add vertices into graph
     graph.addNeighborhood(Allston);
     graph.addNeighborhood(Backbay);
     graph.addNeighborhood(Beacon_Hill);
@@ -310,26 +310,41 @@ int main() {
     graph.addNeighborhood(West_Roxbury); 
 
 
-    //add edges
-    graph.addEdge("Roxbury", "Jamaica Plain");
-    graph.addEdge("Roxbury", "Roslindale");
-    graph.addEdge("Roxbury", "Mattapan");
-    graph.addEdge("Roxbury", "Dorchester");
-    graph.addEdge("Dorchester","Mission Hill");
-    graph.addEdge("Mattapan","South End");
-    graph.addEdge("South End","Hyde Park");
-    graph.addEdge("Roslindale","South End");
-   
+    //add edges based on Boston data
+    graph.addEdge("Allston", "Back Bay");
+    graph.addEdge("Back Bay", "Beacon Hill");
+    graph.addEdge("Beacon Hill", "Brighton");
+    graph.addEdge("Brighton", "Charlestown");
+    graph.addEdge("Charlestown", "Dorchester");
+    graph.addEdge("Dorchester", "Downtown");
+    graph.addEdge("Downtown", "East Boston");
+    graph.addEdge("East Boston", "Fenway");
+    graph.addEdge("Fenway", "Hyde Park");
+    graph.addEdge("Hyde Park", "Jamaica Plain");
+    graph.addEdge("Jamaica Plain", "Longwood Medical Center");
+    graph.addEdge("Longwood Medical Center", "Mattapan");
+    graph.addEdge("Mattapan", "Mission Hill");
+    graph.addEdge("Mission Hill", "North End");
+    graph.addEdge("North End", "Roslindale");
+    graph.addEdge("Roslindale", "Roxbury");
+    graph.addEdge("Roxbury", "South Boston");
+    graph.addEdge("South Boston", "South Boston Waterfront");
+    graph.addEdge("South Boston Waterfront", "South End");
+    graph.addEdge("South End", "West End");
+    graph.addEdge("West End", "West Roxbury");
+    graph.addEdge("West Roxbury", "Allston");
 
 
     // Menu:
+
     bool system_running = true; 
     int selection;  
     string neighborhoodName; 
 
-    
+    //while loop that mantains the menu bar
     while(system_running)
     {
+        //print menu
         cout << "Please select (1-4)\n" <<
                 "1.Display a Neighborhoods Data \n" <<
                 "2.General Mobile Market Route\n" <<
@@ -342,27 +357,34 @@ int main() {
 
         cin >> selection; 
 
+        //switch case for each selection
         switch(selection){
+
+            //Case 1: User inputs  a neighborhood, program outputs data values for it
             case 1:
                 cout << "Enter a Neighborhood: "; 
                 cin >> neighborhoodName;
+                //if valid neighborhood, call searchneighborhood
                 if (graph.adjList.count(neighborhoodName) == 1) {
                     graph.SearchNeighborhood(neighborhoodName); 
                 }
+                //else return error
                 else if (graph.adjList.count(neighborhoodName) == 0){
                     cout << "Not a Valid Neighborhood." <<endl;
                 }
 
                 break; 
 
+            //Case 2: General Mobile Market Route
             case 2:
                 cout << "Enter a Neighborhood to start the route at: "; 
                 cin >> neighborhoodName;
-                
+                //if valid neighborhood, call bfs function
                 if (graph.adjList.count(neighborhoodName) == 1) {
                     getUserInputForWeights();
                     graph.bfsWithWeightedOrder(neighborhoodName,1);
                 }
+                //else return error
                 else if (graph.adjList.count(neighborhoodName) == 0){
                     cout << "Not a Valid Neighborhood." <<endl;
                 }
@@ -371,6 +393,7 @@ int main() {
         
                 break; 
 
+            //Case 3: Mobile Market Route During a Natural Disaster
             case 3: 
                 cout << "Enter a Neighborhood to start the route at: "; 
                 cin >> neighborhoodName;
@@ -383,7 +406,7 @@ int main() {
                 }
                 
                 break; 
-
+            //Case 4: End program
             case 4:
                 cout << "Ending Program" << endl; 
                 system_running = false; 
@@ -397,7 +420,29 @@ int main() {
     }       
 
 
-//delete nodes
+//delete pointers
+    delete Allston;
+    delete Backbay;
+    delete Beacon_Hill;
+    delete Brighton;
+    delete Charlestown;
+    delete Dorchester;
+    delete Downtown;
+    delete East_Boston;
+    delete Fenway;
+    delete Hyde_Park;
+    delete Jamaica_Plain;
+    delete Longwood_Medical_Center;
+    delete Mattapan;
+    delete Mission_Hill;
+    delete North_End;
+    delete Roslindale;
+    delete Roxbury;
+    delete South_Boston;
+    delete South_Boston_Waterfront;
+    delete South_End;
+    delete West_End;
+    delete West_Roxbury;
 
 
     return 0;
